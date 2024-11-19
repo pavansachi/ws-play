@@ -5,28 +5,73 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
   <script src="/socket.io/socket.io.js"></script>
+  <style>
+    canvas {
+      border: 1px solid black;
+    }
+  </style>
 </head>
 <body>
   <h1>Dashboard</h1>
-  <ul id="clientList"></ul>
+  <canvas id="dashboardCanvas" width="800" height="600"></canvas>
 
   <script>
     const socket = io();
+    const canvas = document.getElementById('dashboardCanvas');
+    const ctx = canvas.getContext('2d');
+    const circles = {}; // Track circles by client ID
+
+    // Draw a circle at a given position
+    function drawCircle(x, y, color = 'blue') {
+      ctx.beginPath();
+      ctx.arc(x, y, 10, 0, 2 * Math.PI); // Circle radius 10
+      ctx.fillStyle = color;
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    // Clear the canvas
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
 
     socket.on('connect', () => {
-      console.log('dashboard is connected to server with ID:', socket.id);
+      console.log('Connected to server as dashboard with ID:', socket.id);
 
       // Join the dashboard room
       socket.emit('join_dashboard');
     });
 
-    // Listen for new client connections
-    socket.on('new_client', (clientId) => {
-      const clientList = document.getElementById('clientList');
-      const newClientItem = document.createElement('li');
-      newClientItem.textContent = `Client connected: ${clientId}`;
-      clientList.appendChild(newClientItem);
+    // Handle new client connections
+    socket.on('new_client', (data) => {
+      circles[data.id] = { x: Math.random() * canvas.width, y: Math.random() * canvas.height };
+      redrawCanvas();
     });
+
+    // Handle client movement updates
+    socket.on('update_circle', (data) => {
+      if (circles[data.id]) {
+        circles[data.id].x = data.x;
+        circles[data.id].y = data.y;
+        redrawCanvas();
+      }
+    });
+
+    // Handle client disconnections
+    socket.on('client_disconnected', (data) => {
+      delete circles[data.id];
+      redrawCanvas();
+    });
+
+    // Redraw all circles
+    function redrawCanvas() {
+      clearCanvas();
+      console.log(circles);
+      for (const id in circles) {
+        const { x, y } = circles[id];
+        drawCircle(x, y);
+      }
+    }
   </script>
 </body>
 </html>

@@ -15,7 +15,7 @@ io.on('connection', (socket) => {
 
     // socket for dashboard
     socket.on('join_dashboard', () => {
-        console.log('User joined dashboard', socket.id);
+        console.log('dashboard joined', socket.id);
         // Join the dashboard room
         socket.join('dashboard');
     });
@@ -23,7 +23,13 @@ io.on('connection', (socket) => {
     // socket for client
     socket.on('client_joined', () => {
         console.log('client joined', socket.id);
-        io.to('dashboard').emit('new_client', socket.id);
+        io.to('dashboard').emit('new_client',  { id: socket.id });
+    });
+
+    // Handle client movement
+    socket.on('move_circle', (data) => {
+        console.log('move_circle', data);
+        io.to('dashboard').emit('update_circle', { id: socket.id, ...data });
     });
 
     // Emit the list of connected clients to the newly connected client

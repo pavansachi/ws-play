@@ -8,16 +8,38 @@
 </head>
 <body>
   <h1>Client Page</h1>
-  <p>Connecting to server...</p>
+  <p>Use arrow keys to move your circle on the dashboard.</p>
   <script>
     const socket = io();
+    let position = { x: 100, y: 100 }; // Initial position
 
     socket.on('connect', () => {
+      console.log('Connected to server with ID:', socket.id);
+      socket.emit('client_joined'); // Emit an event to join the dashboard room
+    });
 
-      document.querySelector('p').textContent = 'Connected to server with ID:' + socket.id;
+    // Listen for arrow key presses to move the circle
+    document.addEventListener('keydown', (event) => {
+      const step = 10; // Movement step size
+      switch (event.key) {
+        case 'ArrowUp':
+          position.y -= step;
+          break;
+        case 'ArrowDown':
+          position.y += step;
+          break;
+        case 'ArrowLeft':
+          position.x -= step;
+          break;
+        case 'ArrowRight':
+          position.x += step;
+          break;
+        default:
+          return;
+      }
 
-      // Notify the server that a client has connected
-      socket.emit('client_joined');
+      // Emit the new position to the server
+      socket.emit('move_circle', position);
     });
   </script>
 </body>
