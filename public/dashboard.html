@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h1>Dashboard</h1>
+  <ul id="clientList"></ul>
+
+  <script>
+    const socket = io();
+
+    socket.on('connect', () => {
+      console.log('dashboard is connected to server with ID:', socket.id);
+
+      // Join the dashboard room
+      socket.emit('join_dashboard');
+    });
+
+    // Listen for new client connections
+    socket.on('new_client', (clientId) => {
+      const clientList = document.getElementById('clientList');
+      const newClientItem = document.createElement('li');
+      newClientItem.textContent = `Client connected: ${clientId}`;
+      clientList.appendChild(newClientItem);
+    });
+  </script>
+</body>
+</html>

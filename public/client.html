@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Client</title>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+  <h1>Client Page</h1>
+  <p>Connecting to server...</p>
+  <script>
+    const socket = io();
+
+    socket.on('connect', () => {
+
+      document.querySelector('p').textContent = 'Connected to server with ID:' + socket.id;
+
+      // Notify the server that a client has connected
+      socket.emit('client_joined');
+    });
+  </script>
+</body>
+</html>
